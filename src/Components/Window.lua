@@ -36,11 +36,19 @@ return function(Config)
 	Window.AcrylicPaint = Acrylic.AcrylicPaint()
 	Window.TabWidth = Config.TabWidth
 
+	local SelectorContainer = New("Frame", {
+		Size = UDim2.new(1, 0, 1, Config.Logo and -110 or 0),
+		Position = UDim2.new(0, 0, 0, Config.Logo and 110 or 0),
+		BackgroundTransparency = 1,
+		ClipsDescendants = true,
+	})
+
 	local Selector = New("Frame", {
 		Size = UDim2.new(0, 4, 0, 0),
 		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-		Position = UDim2.new(0, 0, 0, 17 + (Config.Logo and 110 or 0)),
+		Position = UDim2.new(0, 0, 0, 17),
 		AnchorPoint = Vector2.new(0, 0.5),
+		Parent = SelectorContainer,
 		ThemeTag = {
 			BackgroundColor3 = "Accent",
 		},
@@ -74,7 +82,7 @@ return function(Config)
 
 	local TabChildren = {
 		Window.TabHolder,
-		Selector,
+		SelectorContainer,
 	}
 
 	if Config.Logo and Config.Logo ~= "" then
@@ -180,7 +188,7 @@ return function(Config)
 	local LastValue = 0
 	local LastTime = 0
 	Window.SelectorPosMotor:onStep(function(Value)
-		Selector.Position = UDim2.new(0, 0, 0, Value + 17 + (Config.Logo and 110 or 0))
+		Selector.Position = UDim2.new(0, 0, 0, Value + 17)
 		local Now = tick()
 		local DeltaTime = Now - LastTime
 
