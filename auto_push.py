@@ -56,8 +56,14 @@ def main():
     if not run_command(f'git commit -m "{commit_msg}"', "コミット"):
         sys.exit(1)
 
-    # 5. git push
-    print("\n[STEP 5] リモートへのプッシュ (git push origin master)")
+    # 5. git pull
+    print("\n[STEP 5] リモートから最新の変更を取得 (git pull --rebase origin master)")
+    if not run_command("git pull --rebase origin master", "プル"):
+        print("\n[FAILED] プルに失敗しました。ローカルとリモートの間にコンフリクトがある可能性があります。")
+        sys.exit(1)
+
+    # 6. git push
+    print("\n[STEP 6] リモートへのプッシュ (git push origin master)")
     if not run_command("git push origin master", "プッシュ"):
         print("\n[FAILED] プッシュに失敗しました。")
         sys.exit(1)

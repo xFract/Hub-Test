@@ -1,6 +1,7 @@
 local httpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 local VirtualUser = game:GetService("VirtualUser")
+local TeleportService = game:GetService("TeleportService")
 
 local InterfaceManager = {} do
 	InterfaceManager.Folder = "FluentSettings"
@@ -14,9 +15,15 @@ local InterfaceManager = {} do
         AntiAFK = false,
         PerformanceMode = false,
         FPSCap = 60,
+        AutoRejoin = false,
+        LowPlayerHop = false,
+        StaffDetector = false,
+        WebhookURL = "",
     }
     
     InterfaceManager.AFKThread = nil
+    InterfaceManager.IsRejoining = false
+    InterfaceManager.IsHopping = false
 
     function InterfaceManager:SetFolder(folder)
 		self.Folder = folder;
@@ -123,6 +130,193 @@ local InterfaceManager = {} do
         end
     end
 
+    -- Discord Webhookへの通知送信
+    function InterfaceManager:SendWebhook(title, description)
+        local webhookUrl = self.Settings.WebhookURL
+        if not webhookUrl or webhookUrl == "" then return end
+        
+        task.spawn(function()
+            pcall(function()
+                local payload = httpService:JSONEncode({
+                    embeds = {{
+                        title = title,
+                        description = description,
+                        color = 16711680, -- 赤色で警告を視覚化
+                        footer = { text = "Fract-Hub Staff Detector" },
+                        timestamp = DateTime.now():ToIsoDate()
+                    }}
+                })
+                
+                -- エクスプロイト環境のHTTPリクエスト関数を検出して使用
+                local httpRequest = (syn and syn.request) or request or http_request or (http and http.request)
+                if httpRequest then
+                    httpRequest({
+                        Url = webhookUrl,
+                        Method = "POST",
+                        Headers = { ["Content-Type"] = "application/json" },
+                        Body = payload
+                    })
+                end
+            end)
+        end)
+    end
+
+    -- サーバー移動（通常Hop / Low Player Hop対応）
+    function InterfaceManager:ServerHop(lowPlayerOnly)
+        if self.IsHopping then return end
+        self.IsHopping = true
+        
+        task.spawn(function()
+            local success, result = pcall(function()
+                local url = string.format(
+                    "https://games.roblox.com/v1/games/%d/servers/Public?sortOrder=Asc&limit=100",
+                    game.PlaceId
+                )
+                local response = game:HttpGet(url)
+                return httpService:JSONDecode(response)
+            end)
+            
+            if not success or not result or not result.data then
+                -- API取得失敗時はランダムサーバーへテレポート
+                pcall(function()
+                    TeleportService:Teleport(game.PlaceId, Players.LocalPlayer)
+                end)
+                self.IsHopping = false
+                return
+            end
+            
+            local currentJobId = game.JobId
+            local targetServer = nil
+            
+            for _, server in ipairs(result.data) do
+                -- 自分がいるサーバーは除外
+                if server.id ~= currentJobId and server.playing and server.maxPlayers then
+                    if lowPlayerOnly then
+                        -- 過疎サーバーを優先（プレイヤー数が最大人数の30%未満）
+                        if server.playing < (server.maxPlayers * 0.3) then
+                            targetServer = server
+                            break
+                        end
+                    else
+                        targetServer = server
+                        break
+                    end
+                end
+            end
+            
+            pcall(function()
+                if targetServer then
+                    TeleportService:TeleportToPlaceInstance(game.PlaceId, targetServer.id, Players.LocalPlayer)
+                else
+                    TeleportService:Teleport(game.PlaceId, Players.LocalPlayer)
+                end
+            end)
+            
+            task.wait(5)
+            self.IsHopping = false
+        end)
+    end
+
+    -- プレイヤーがStaff（管理者相当）かどうかを自動判定
+    function InterfaceManager:IsStaff(player)
+        if not player or player == Players.LocalPlayer then return false end
+        
+        -- ゲームのCreatorがユーザー本人かどうか
+        if game.CreatorType == Enum.CreatorType.User then
+            if player.UserId == game.CreatorId then return true end
+        end
+        
+        -- ゲームのCreatorがグループの場合、そのグループ内での役職ランクを確認
+        if game.CreatorType == Enum.CreatorType.Group then
+            local rankSuccess, rank = pcall(function()
+                return player:GetRankInGroup(game.CreatorId)
+            end)
+            -- ランク200以上を管理者と推定（一般メンバーは通常1〜100程度）
+            if rankSuccess and rank >= 200 then return true end
+        end
+        
+        -- 公式認定バッジの有無（大規模ゲームの管理者に多い）
+        local verifiedSuccess, verified = pcall(function()
+            return player.HasVerifiedBadge
+        end)
+        if verifiedSuccess and verified then return true end
+        
+        return false
+    end
+
+    -- Auto Rejoin: エラー発生時の自動再接続
+    function InterfaceManager:BindAutoRejoin()
+        local function triggerRejoin()
+            if not self.Settings.AutoRejoin or self.IsRejoining then return end
+            self.IsRejoining = true
+            task.wait(3)
+            
+            pcall(function()
+                if #game.JobId > 0 then
+                    TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, Players.LocalPlayer)
+                else
+                    TeleportService:Teleport(game.PlaceId, Players.LocalPlayer)
+                end
+            end)
+            
+            task.wait(5)
+            self.IsRejoining = false
+        end
+        
+        -- CoreGuiのエラープロンプト監視
+        local CoreGui = game:GetService("CoreGui")
+        pcall(function()
+            local promptOverlay = CoreGui:FindFirstChild("RobloxPromptGui"):FindFirstChild("promptOverlay")
+            if promptOverlay then
+                promptOverlay.ChildAdded:Connect(function(child)
+                    if child.Name == "ErrorPrompt" then
+                        triggerRejoin()
+                    end
+                end)
+            end
+        end)
+        
+        -- GuiServiceのエラーメッセージ監視
+        pcall(function()
+            game:GetService("GuiService").ErrorMessageChanged:Connect(function()
+                triggerRejoin()
+            end)
+        end)
+    end
+
+    -- Staff Detector: サーバー内のStaff検知と自動Hop
+    function InterfaceManager:BindStaffDetector()
+        local function checkPlayer(player)
+            if not self.Settings.StaffDetector then return end
+            
+            local isStaff = self:IsStaff(player)
+            if not isStaff then return end
+            
+            -- Webhook通知
+            self:SendWebhook(
+                "⚠️ Staff Detected",
+                string.format(
+                    "**Player:** %s\n**UserId:** %d\n**Game:** %s (PlaceId: %d)\n**Action:** Auto Hop",
+                    player.Name, player.UserId, game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name or "Unknown", game.PlaceId
+                )
+            )
+            
+            -- 即座にサーバー移動
+            task.wait(1)
+            self:ServerHop(false)
+        end
+        
+        -- 新規参加プレイヤーの監視
+        Players.PlayerAdded:Connect(checkPlayer)
+        
+        -- 既にサーバーにいるプレイヤーも確認
+        task.spawn(function()
+            for _, player in ipairs(Players:GetPlayers()) do
+                checkPlayer(player)
+            end
+        end)
+    end
+
     function InterfaceManager:BindTeleportAutoExecute()
         local Settings = self.Settings
         local queued = false
@@ -148,9 +342,14 @@ local InterfaceManager = {} do
         -- Start AutoExecute Binder
         self:BindTeleportAutoExecute()
         
+        -- Start AutoRejoin Binder
+        self:BindAutoRejoin()
+        
+        -- Start Staff Detector Binder
+        self:BindStaffDetector()
+        
         -- Handle AutoMinimize if on initial load
         if Settings.AutoMinimize and Library.Window then
-            -- We spawn this to let the UI finish setting up first if needed
             task.spawn(function()
                 if not Library.Window.Minimized then
                     Library.Window:Minimize()
@@ -263,6 +462,53 @@ local InterfaceManager = {} do
             Rounding = 0,
             Callback = function(Value)
                 InterfaceManager:SetFPSCap(Value)
+                InterfaceManager:SaveSettings()
+            end
+        })
+
+        -- Server & Safety セクション
+        local ServerSection = tab:AddSection("Server & Safety")
+        
+        ServerSection:AddToggle("AutoRejoinToggle", {
+            Title = "Auto Rejoin",
+            Default = Settings.AutoRejoin,
+            Callback = function(Value)
+                Settings.AutoRejoin = Value
+                InterfaceManager:SaveSettings()
+            end
+        })
+        
+        ServerSection:AddToggle("StaffDetectorToggle", {
+            Title = "Staff Detector",
+            Default = Settings.StaffDetector,
+            Callback = function(Value)
+                Settings.StaffDetector = Value
+                InterfaceManager:SaveSettings()
+            end
+        })
+
+        ServerSection:AddButton({
+            Title = "Low Player Hop",
+            Callback = function()
+                InterfaceManager:ServerHop(true)
+            end
+        })
+
+        ServerSection:AddButton({
+            Title = "Server Hop",
+            Callback = function()
+                InterfaceManager:ServerHop(false)
+            end
+        })
+
+        ServerSection:AddInput("WebhookURLInput", {
+            Title = "Discord Webhook URL",
+            Default = Settings.WebhookURL,
+            Numeric = false,
+            Finished = true,
+            Placeholder = "https://discord.com/api/webhooks/...",
+            Callback = function(Value)
+                Settings.WebhookURL = Value
                 InterfaceManager:SaveSettings()
             end
         })
