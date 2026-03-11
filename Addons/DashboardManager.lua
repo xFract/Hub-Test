@@ -78,6 +78,63 @@ function DashboardManager:BuildDashboardTab(tab, config)
 	local localPlayer = Players.LocalPlayer
 	local container = tab.ContainerFrame or tab.Container
 
+	-- ===== プレースアイコンを背景画像として配置 =====
+	-- コンテナの最背面にゲームのアイコンを半透明で表示する
+	local backgroundHolder = Instance.new("Frame")
+	backgroundHolder.Size = UDim2.fromScale(1, 1)
+	backgroundHolder.BackgroundTransparency = 1
+	backgroundHolder.ZIndex = 0
+	backgroundHolder.Parent = container
+
+	local backgroundImage = Instance.new("ImageLabel")
+	backgroundImage.Size = UDim2.new(1, 20, 0, 200)
+	backgroundImage.Position = UDim2.fromOffset(-10, -5)
+	backgroundImage.BackgroundTransparency = 1
+	backgroundImage.ImageTransparency = 0.85
+	backgroundImage.ScaleType = Enum.ScaleType.Crop
+	backgroundImage.ZIndex = 0
+	backgroundImage.Parent = backgroundHolder
+
+	local bgCorner = Instance.new("UICorner")
+	bgCorner.CornerRadius = UDim.new(0, 8)
+	bgCorner.Parent = backgroundImage
+
+	-- ゲームアイコンを動的に取得
+	task.spawn(function()
+		local success, info = pcall(function()
+			return MarketplaceService:GetProductInfo(game.PlaceId)
+		end)
+		if success and info then
+			-- MarketplaceServiceからアイコン画像IDを取得
+			local iconId = info.IconImageAssetId
+			if iconId and iconId ~= 0 then
+				backgroundImage.Image = "rbxassetid://" .. tostring(iconId)
+			end
+		end
+	end)
+
+	-- 背景画像の上にグラデーションオーバーレイ（下部を暗くして視認性確保）
+	local gradientOverlay = Instance.new("Frame")
+	gradientOverlay.Size = UDim2.new(1, 20, 0, 200)
+	gradientOverlay.Position = UDim2.fromOffset(-10, -5)
+	gradientOverlay.BackgroundColor3 = Color3.fromRGB(15, 17, 21)
+	gradientOverlay.BackgroundTransparency = 0.3
+	gradientOverlay.ZIndex = 0
+	gradientOverlay.Parent = backgroundHolder
+
+	local overlayCorner = Instance.new("UICorner")
+	overlayCorner.CornerRadius = UDim.new(0, 8)
+	overlayCorner.Parent = gradientOverlay
+
+	local gradient = Instance.new("UIGradient")
+	gradient.Transparency = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 0.6),
+		NumberSequenceKeypoint.new(0.5, 0.2),
+		NumberSequenceKeypoint.new(1, 0),
+	})
+	gradient.Rotation = 90
+	gradient.Parent = gradientOverlay
+
 	-- ===== カード生成ヘルパー =====
 	-- Section.luaと同様のガラスモーフィズムカードを生成する
 	local function MakeCard(props)

@@ -66,8 +66,8 @@ local Window = Fluent:CreateWindow({
 local Options = Fluent.Options
 
 do
-    -- Main Tab Elements
-	local FarmPosSection = Tabs.Main:AddSection("Position & Distance")
+    -- AutoLevel Tab Elements（テスト要素をAutoLevelタブに配置）
+	local FarmPosSection = Tabs.AutoLevel:AddSection("Position & Distance")
     local DamageIncrement = FarmPosSection:AddSlider("DamageIncrement", {
         Title = "Farm Distance",
         Description = "Set the distance to farm",
@@ -81,7 +81,7 @@ do
         end
     })
 
-	local DropdownSection = Tabs.Main:AddSection("Target Selection")
+	local DropdownSection = Tabs.AutoLevel:AddSection("Target Selection")
     local TargetDropdown = DropdownSection:AddDropdown("TargetMob", {
         Title = "Target Mob",
         Description = "Select the mob to target",
@@ -93,10 +93,10 @@ do
         end
     })
 
-	local AutoLevelSection = Tabs.Main:AddSection("Auto Level")
+	local AutoLevelSection = Tabs.AutoLevel:AddSection("Auto Level")
     local AutoFarm = AutoLevelSection:AddToggle("AutoFarm", {
         Title = "Auto Level", 
-        Description = "Automatically levels upaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        Description = "Automatically levels up",
         Default = false 
     })
 
@@ -110,7 +110,7 @@ do
         print("Auto Attack:", Options.AutoAttack.Value)
     end)
 
-	local LootSection = Tabs.Main:AddSection("Looting")
+	local LootSection = Tabs.AutoLevel:AddSection("Looting")
     local AutoLootChests = LootSection:AddToggle("AutoLootChests", {
         Title = "Auto Loot Chests", 
         Description = "Automatically loots chests",
