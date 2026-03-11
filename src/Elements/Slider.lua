@@ -30,7 +30,7 @@ function Element:New(Idx, Config)
 	local Dragging = false
 
 	local SliderFrame = require(Components.Element)(Config.Title, Config.Description, self.Container, false)
-	SliderFrame.DescLabel.Size = UDim2.new(1, -170, 0, 14)
+	SliderFrame.DescLabel.Size = UDim2.new(1, -210, 0, 14)
 
 	Slider.SetTitle = SliderFrame.SetTitle
 	Slider.SetDesc = SliderFrame.SetDesc
@@ -78,8 +78,8 @@ function Element:New(Idx, Config)
 		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
 		BackgroundTransparency = 1,
 		Size = UDim2.new(0, 100, 0, 14),
-		Position = UDim2.new(0, -4, 0.5, 0),
-		AnchorPoint = Vector2.new(1, 0.5),
+		Position = UDim2.new(1, 0, 0, -8),
+		AnchorPoint = Vector2.new(1, 1),
 		ThemeTag = {
 			TextColor3 = "SubText",
 		},
@@ -88,7 +88,7 @@ function Element:New(Idx, Config)
 	local SliderInner = New("Frame", {
 		Size = UDim2.new(1, 0, 0, 4),
 		AnchorPoint = Vector2.new(1, 0.5),
-		Position = UDim2.new(1, -10, 0.5, 0),
+		Position = UDim2.new(1, -10, 0.5, 8),
 		BackgroundTransparency = 0.4,
 		Parent = SliderFrame.Frame,
 		ThemeTag = {
@@ -99,7 +99,7 @@ function Element:New(Idx, Config)
 			CornerRadius = UDim.new(1, 0),
 		}),
 		New("UISizeConstraint", {
-			MaxSize = Vector2.new(150, math.huge),
+			MaxSize = Vector2.new(190, math.huge),
 		}),
 		SliderDisplay,
 		SliderFill,
