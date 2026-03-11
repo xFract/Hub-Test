@@ -38,15 +38,17 @@ local Window = Fluent:CreateWindow({
     MinimizeKey = Enum.KeyCode.LeftControl
 })
 
-	-- ダッシュボードを最初に自動生成（タブ一覧の先頭に配置）
+	local Tabs = {
+		Main = Window:AddTab({ Title = "Dashboards", Icon = "layout-dashboard" }),
+	}
+
+	-- ダッシュボードの構築
 	DashboardManager:SetLibrary(Fluent)
-	DashboardManager:BuildDashboardTab(Window, {
+	DashboardManager:BuildDashboardTab(Tabs.Main, {
 	    GameName = "Solo Hunter",
 	    Developer = "xFract",
 	    Discord = "https://discord.gg/fracthub",
 	})
-
-	local Tabs = {}
 
 	Window:AddTabSection("Farming")
 	Tabs.AutoLevel = Window:AddTab({ Title = "Auto Level", Icon = "trending-up" })
@@ -67,6 +69,7 @@ local Window = Fluent:CreateWindow({
 	
 	Window:AddTabSection("Settings")
 	Tabs.Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
+	Tabs.Config = Window:AddTab({ Title = "Config", Icon = "save" })
 
 local Options = Fluent.Options
 
@@ -140,7 +143,7 @@ SaveManager:SetFolder("FractHub/SoloHunter")
 
 
 InterfaceManager:BuildInterfaceSection(Tabs.Settings)
-SaveManager:BuildConfigSection(Tabs.Settings)
+SaveManager:BuildConfigSection(Tabs.Config)
 
 Window:SelectTab(1)
 

@@ -68,12 +68,10 @@ local function GetRegion()
 	else return "EU" end
 end
 
-function DashboardManager:BuildDashboardTab(window, config)
+function DashboardManager:BuildDashboardTab(tab, config)
 	assert(self.Library, "Must set DashboardManager.Library first")
-	assert(window, "Must pass Window object")
+	assert(tab, "Must pass Tab object")
 
-	-- ダッシュボードタブを自動生成（セクションヘッダーなし）
-	local tab = window:AddTab({ Title = "Dashboards", Icon = "layout-dashboard" })
 	self.Tab = tab
 
 	config = config or {}
