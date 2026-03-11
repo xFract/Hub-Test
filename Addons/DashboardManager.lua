@@ -133,6 +133,16 @@ function DashboardManager:BuildDashboardTab(tab, config)
 	-- ScrollingFrameのZIndexをオーバーレイより前面に設定
 	container.ZIndex = 2
 
+	-- ダッシュボードタブが表示されている時のみ背景を表示
+	-- （containerのVisibleプロパティに連動）
+	local function syncBackgroundVisibility()
+		local isVisible = container.Visible
+		backgroundImage.Visible = isVisible
+		gradientOverlay.Visible = isVisible
+	end
+	syncBackgroundVisibility()
+	container:GetPropertyChangedSignal("Visible"):Connect(syncBackgroundVisibility)
+
 	-- ===== カード生成ヘルパー =====
 	-- Section.luaと同様のガラスモーフィズムカードを生成する
 	local function MakeCard(props)
