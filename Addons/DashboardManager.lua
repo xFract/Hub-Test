@@ -340,8 +340,8 @@ function DashboardManager:BuildDashboardTab(tab, config)
 	discordIcon.Size = UDim2.fromOffset(18, 18)
 	discordIcon.Position = UDim2.fromOffset(0, 0)
 	discordIcon.BackgroundTransparency = 1
-	discordIcon.Image = "rbxassetid://7733960981"
-	discordIcon.ImageColor3 = Color3.fromRGB(88, 101, 242)
+	discordIcon.Image = "rbxassetid://4458901886"
+	discordIcon.ImageColor3 = Color3.fromRGB(255, 255, 255)
 	discordIcon.Parent = discordCard
 
 	MakeLabel({
