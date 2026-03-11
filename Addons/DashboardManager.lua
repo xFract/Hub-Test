@@ -342,6 +342,7 @@ function DashboardManager:BuildDashboardTab(tab, config)
 	discordIcon.BackgroundTransparency = 1
 	discordIcon.Image = "rbxassetid://125393786192650"
 	discordIcon.ImageColor3 = Color3.fromRGB(255, 255, 255)
+	discordIcon.ScaleType = Enum.ScaleType.Fit
 	discordIcon.Parent = discordCard
 
 	MakeLabel({
