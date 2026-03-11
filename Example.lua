@@ -1,10 +1,30 @@
-	local function GetURL(script_url)
-		return script_url .. "?v=" .. tostring(math.floor(tick()))
+	local HttpService = game:GetService("HttpService")
+	
+	-- Fetch the latest commit SHA to completely bypass GitHub raw caching
+	local function GetLatestSHA()
+		local success, result = pcall(function()
+			-- Append tick to bypass Roblox's own HttpGet cache for the API request
+			local apiUrl = "https://api.github.com/repos/xFract/Fract-Hub/commits/master?v=" .. tostring(tick())
+			local response = game:HttpGet(apiUrl)
+			local data = HttpService:JSONDecode(response)
+			return data.sha
+		end)
+		if success and result then
+			return result
+		end
+		return "master" -- Fallback
 	end
 
-	local Fluent = loadstring(game:HttpGet(GetURL("https://raw.githubusercontent.com/xFract/Fract-Hub/master/dist/main.lua")))()
-	local SaveManager = loadstring(game:HttpGet(GetURL("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua")))()
-	local InterfaceManager = loadstring(game:HttpGet(GetURL("https://raw.githubusercontent.com/xFract/Fract-Hub/master/Addons/InterfaceManager.lua")))()
+	local latestSha = GetLatestSHA()
+
+	local function GetFractURL(filepath)
+		return "https://raw.githubusercontent.com/xFract/Fract-Hub/" .. latestSha .. "/" .. filepath
+	end
+
+	local Fluent = loadstring(game:HttpGet(GetFractURL("dist/main.lua")))()
+	-- dawid-scripts component can remain on master w/o dynamic cache busting as it doesn't change often
+	local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
+	local InterfaceManager = loadstring(game:HttpGet(GetFractURL("Addons/InterfaceManager.lua")))()
 
 local Window = Fluent:CreateWindow({
     Title = "Fract Hub",
