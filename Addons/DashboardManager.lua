@@ -79,24 +79,20 @@ function DashboardManager:BuildDashboardTab(tab, config)
 	local container = tab.ContainerFrame or tab.Container
 
 	-- ===== プレースアイコンを背景画像として配置 =====
-	-- コンテナの最背面にゲームのアイコンを半透明で表示する
-	local backgroundHolder = Instance.new("Frame")
-	backgroundHolder.Size = UDim2.fromScale(1, 1)
-	backgroundHolder.BackgroundTransparency = 1
-	backgroundHolder.ZIndex = 0
-	backgroundHolder.Parent = container
+	-- ScrollingFrameの親（ContainerHolder相当）に配置し、UIListLayoutの影響を受けないようにする
+	local backgroundParent = container.Parent
 
 	local backgroundImage = Instance.new("ImageLabel")
-	backgroundImage.Size = UDim2.new(1, 20, 0, 200)
-	backgroundImage.Position = UDim2.fromOffset(-10, -5)
+	backgroundImage.Size = UDim2.fromScale(1, 1)
+	backgroundImage.Position = UDim2.fromOffset(0, 0)
 	backgroundImage.BackgroundTransparency = 1
-	backgroundImage.ImageTransparency = 0.85
+	backgroundImage.ImageTransparency = 0.82
 	backgroundImage.ScaleType = Enum.ScaleType.Crop
 	backgroundImage.ZIndex = 0
-	backgroundImage.Parent = backgroundHolder
+	backgroundImage.Parent = backgroundParent
 
 	local bgCorner = Instance.new("UICorner")
-	bgCorner.CornerRadius = UDim.new(0, 8)
+	bgCorner.CornerRadius = UDim.new(0, 6)
 	bgCorner.Parent = backgroundImage
 
 	-- ゲームアイコンを動的に取得
@@ -105,7 +101,6 @@ function DashboardManager:BuildDashboardTab(tab, config)
 			return MarketplaceService:GetProductInfo(game.PlaceId)
 		end)
 		if success and info then
-			-- MarketplaceServiceからアイコン画像IDを取得
 			local iconId = info.IconImageAssetId
 			if iconId and iconId ~= 0 then
 				backgroundImage.Image = "rbxassetid://" .. tostring(iconId)
@@ -113,27 +108,30 @@ function DashboardManager:BuildDashboardTab(tab, config)
 		end
 	end)
 
-	-- 背景画像の上にグラデーションオーバーレイ（下部を暗くして視認性確保）
+	-- 背景画像の上にグラデーションオーバーレイ（視認性確保）
 	local gradientOverlay = Instance.new("Frame")
-	gradientOverlay.Size = UDim2.new(1, 20, 0, 200)
-	gradientOverlay.Position = UDim2.fromOffset(-10, -5)
+	gradientOverlay.Size = UDim2.fromScale(1, 1)
+	gradientOverlay.Position = UDim2.fromOffset(0, 0)
 	gradientOverlay.BackgroundColor3 = Color3.fromRGB(15, 17, 21)
-	gradientOverlay.BackgroundTransparency = 0.3
+	gradientOverlay.BackgroundTransparency = 0.15
 	gradientOverlay.ZIndex = 0
-	gradientOverlay.Parent = backgroundHolder
+	gradientOverlay.Parent = backgroundParent
 
 	local overlayCorner = Instance.new("UICorner")
-	overlayCorner.CornerRadius = UDim.new(0, 8)
+	overlayCorner.CornerRadius = UDim.new(0, 6)
 	overlayCorner.Parent = gradientOverlay
 
 	local gradient = Instance.new("UIGradient")
 	gradient.Transparency = NumberSequence.new({
-		NumberSequenceKeypoint.new(0, 0.6),
-		NumberSequenceKeypoint.new(0.5, 0.2),
+		NumberSequenceKeypoint.new(0, 0.5),
+		NumberSequenceKeypoint.new(0.4, 0.15),
 		NumberSequenceKeypoint.new(1, 0),
 	})
 	gradient.Rotation = 90
 	gradient.Parent = gradientOverlay
+
+	-- ScrollingFrameのZIndexをオーバーレイより前面に設定
+	container.ZIndex = 2
 
 	-- ===== カード生成ヘルパー =====
 	-- Section.luaと同様のガラスモーフィズムカードを生成する
