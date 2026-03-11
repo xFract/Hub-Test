@@ -25,6 +25,7 @@
 	-- dawid-scripts component can remain on master w/o dynamic cache busting as it doesn't change often
 	local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
 	local InterfaceManager = loadstring(game:HttpGet(GetFractURL("Addons/InterfaceManager.lua")))()
+	local DashboardManager = loadstring(game:HttpGet(GetFractURL("Addons/DashboardManager.lua")))()
 
 local Window = Fluent:CreateWindow({
     Title = "Fract Hub",
@@ -126,11 +127,21 @@ end
 -- Addons Configuration
 SaveManager:SetLibrary(Fluent)
 InterfaceManager:SetLibrary(Fluent)
+DashboardManager:SetLibrary(Fluent)
 SaveManager:IgnoreThemeSettings()
 SaveManager:SetIgnoreIndexes({})
 
 InterfaceManager:SetFolder("FractHub")
 SaveManager:SetFolder("FractHub/SoloHunter")
+
+-- ダッシュボードの構築
+DashboardManager:BuildDashboardTab(Tabs.Main, {
+    GameName = "Solo Hunter",
+    Developer = "xFract",
+    Discord = "https://discord.gg/fracthub",
+    Changelog = "Latest",
+    AccountStatus = "Coming Soon.",
+})
 
 InterfaceManager:BuildInterfaceSection(Tabs.Settings)
 SaveManager:BuildConfigSection(Tabs.Settings)
