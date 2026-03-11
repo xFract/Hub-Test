@@ -449,6 +449,29 @@ return function(Config)
 	function Window:AddTab(TabConfig)
 		return TabModule:New(TabConfig.Title, TabConfig.Icon, Window.TabHolder)
 	end
+	
+	function Window:AddTabSection(Title)
+		return New("TextLabel", {
+			Text = Title,
+			TextTransparency = 0,
+			FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Medium, Enum.FontStyle.Normal),
+			TextSize = 11,
+			TextXAlignment = Enum.TextXAlignment.Left,
+			TextYAlignment = Enum.TextYAlignment.Center,
+			Size = UDim2.new(1, -12, 0, 20),
+			Position = UDim2.new(0, 12, 0, 0),
+			BackgroundTransparency = 1,
+			Parent = Window.TabHolder,
+			ThemeTag = {
+				TextColor3 = "SubText",
+			},
+		}, {
+			New("UIPadding", {
+				PaddingLeft = UDim.new(0, 12),
+				PaddingBottom = UDim.new(0, 4),
+			})
+		})
+	end
 
 	function Window:SelectTab(Tab)
 		TabModule:SelectTab(1)

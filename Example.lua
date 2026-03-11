@@ -13,15 +13,30 @@ local Window = Fluent:CreateWindow({
     MinimizeKey = Enum.KeyCode.LeftControl
 })
 
-local Tabs = {
-    Main = Window:AddTab({ Title = "Main", Icon = "home" }),
-    Items = Window:AddTab({ Title = "Items", Icon = "sword" }),
-    AutoJoin = Window:AddTab({ Title = "Auto Join", Icon = "log-in" }),
-    Stats = Window:AddTab({ Title = "Stats", Icon = "bar-chart-2" }),
-    Shop = Window:AddTab({ Title = "Shop", Icon = "shopping-cart" }),
-    Teleport = Window:AddTab({ Title = "Teleport", Icon = "compass" }),
-    Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
-}
+	Window:AddTabSection("Dashboard")
+	local Tabs = {
+		Main = Window:AddTab({ Title = "Dashboard", Icon = "layout-dashboard" })
+	}
+
+	Window:AddTabSection("Farming")
+	Tabs.AutoLevel = Window:AddTab({ Title = "Auto Level", Icon = "trending-up" })
+	Tabs.TitleChanger = Window:AddTab({ Title = "Title Changer", Icon = "award" })
+
+	Window:AddTabSection("Boss Farm")
+	Tabs.BossFarm = Window:AddTab({ Title = "Boss Farm", Icon = "skull" })
+
+	Window:AddTabSection("Combat")
+	Tabs.Combat = Window:AddTab({ Title = "Combat", Icon = "sword" })
+
+	Window:AddTabSection("Artifacts")
+	Tabs.Artifacts = Window:AddTab({ Title = "Artifacts", Icon = "gem" })
+
+	Window:AddTabSection("MISC")
+	Tabs.Misc = Window:AddTab({ Title = "MISC", Icon = "sliders" })
+	Tabs.Rerolls = Window:AddTab({ Title = "Rerolls", Icon = "dices" })
+	
+	Window:AddTabSection("Settings")
+	Tabs.Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
 
 local Options = Fluent.Options
 
