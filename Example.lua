@@ -1,6 +1,10 @@
-local Fluent = loadstring(game:HttpGet("https://raw.githubusercontent.com/xFract/Fract-Hub/master/dist/main.lua"))()
-local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
-local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/xFract/Fract-Hub/master/Addons/InterfaceManager.lua"))()
+	local function GetURL(script_url)
+		return script_url .. "?v=" .. tostring(math.floor(tick()))
+	end
+
+	local Fluent = loadstring(game:HttpGet(GetURL("https://raw.githubusercontent.com/xFract/Fract-Hub/master/dist/main.lua")))()
+	local SaveManager = loadstring(game:HttpGet(GetURL("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua")))()
+	local InterfaceManager = loadstring(game:HttpGet(GetURL("https://raw.githubusercontent.com/xFract/Fract-Hub/master/Addons/InterfaceManager.lua")))()
 
 local Window = Fluent:CreateWindow({
     Title = "Fract Hub",
