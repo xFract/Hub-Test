@@ -15,6 +15,9 @@ local TabModule = {
 	TabCount = 0,
 }
 
+local COLUMN_GAP = 8
+local COLUMN_BREAKPOINT = 760
+
 function TabModule:Init(Window)
 	TabModule.Window = Window
 	return TabModule
@@ -93,15 +96,6 @@ function TabModule:New(Title, Icon, Parent)
 		}),
 	})
 
-	local ContainerLayout = New("UIListLayout", {
-		Padding = UDim.new(0, 8),
-		SortOrder = Enum.SortOrder.LayoutOrder,
-		FillDirection = Enum.FillDirection.Horizontal,
-		Wraps = true,
-		HorizontalAlignment = Enum.HorizontalAlignment.Left,
-		VerticalAlignment = Enum.VerticalAlignment.Top,
-	})
-
 	Tab.ContainerFrame = New("ScrollingFrame", {
 		Size = UDim2.fromScale(1, 1),
 		BackgroundTransparency = 1,
@@ -117,7 +111,6 @@ function TabModule:New(Title, Icon, Parent)
 		CanvasSize = UDim2.fromScale(0, 0),
 		ScrollingDirection = Enum.ScrollingDirection.Y,
 	}, {
-		ContainerLayout,
 		New("UIPadding", {
 			PaddingRight = UDim.new(0, 10),
 			PaddingLeft = UDim.new(0, 1),
@@ -126,8 +119,41 @@ function TabModule:New(Title, Icon, Parent)
 		}),
 	})
 
-	Creator.AddSignal(ContainerLayout:GetPropertyChangedSignal("AbsoluteContentSize"), function()
-		Tab.ContainerFrame.CanvasSize = UDim2.new(0, 0, 0, ContainerLayout.AbsoluteContentSize.Y + 2)
+	Tab.Sections = {}
+
+	function Tab:RelayoutSections()
+		local contentWidth = Tab.ContainerFrame.AbsoluteSize.X - 11
+		if contentWidth <= 0 then
+			return
+		end
+
+		local isCompact = contentWidth < COLUMN_BREAKPOINT
+		local columnWidth = isCompact and contentWidth or math.floor((contentWidth - COLUMN_GAP) / 2)
+		local leftHeight = 1
+		local rightHeight = 1
+
+		for index, sectionData in ipairs(Tab.Sections) do
+			local sectionRoot = sectionData.Root
+			local sectionHeight = sectionRoot.AbsoluteSize.Y > 0 and sectionRoot.AbsoluteSize.Y or sectionRoot.Size.Y.Offset
+
+			sectionRoot.Size = UDim2.new(0, columnWidth, 0, sectionRoot.Size.Y.Offset)
+
+			if isCompact or leftHeight <= rightHeight then
+				sectionRoot.Position = UDim2.fromOffset(1, leftHeight)
+				leftHeight = leftHeight + sectionHeight + COLUMN_GAP
+			else
+				sectionRoot.Position = UDim2.fromOffset(columnWidth + COLUMN_GAP + 1, rightHeight)
+				rightHeight = rightHeight + sectionHeight + COLUMN_GAP
+			end
+
+			sectionRoot.LayoutOrder = index
+		end
+
+		Tab.ContainerFrame.CanvasSize = UDim2.new(0, 0, 0, math.max(leftHeight, rightHeight) + 1)
+	end
+
+	Creator.AddSignal(Tab.ContainerFrame:GetPropertyChangedSignal("AbsoluteSize"), function()
+		Tab:RelayoutSections()
 	end)
 
 	Tab.Motor, Tab.SetTransparency = Creator.SpringMotor(1, Tab.Frame, "BackgroundTransparency")
@@ -159,7 +185,16 @@ function TabModule:New(Title, Icon, Parent)
 
 		local SectionFrame = require(Components.Section)(SectionTitle, Tab.Container)
 		Section.Container = SectionFrame.Container
+		Section.Root = SectionFrame.Root
 		Section.ScrollFrame = Tab.Container
+
+		table.insert(Tab.Sections, SectionFrame)
+
+		Creator.AddSignal(SectionFrame.Root:GetPropertyChangedSignal("AbsoluteSize"), function()
+			Tab:RelayoutSections()
+		end)
+
+		Tab:RelayoutSections()
 
 		setmetatable(Section, Elements)
 		return Section

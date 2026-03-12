@@ -5,17 +5,6 @@ local New = Creator.New
 
 return function(Title, Parent)
 	local Section = {}
-	local COLUMN_GAP = 8
-	local COMPACT_BREAKPOINT = 760
-
-	local function getSectionWidth()
-		local parentWidth = Parent.AbsoluteSize.X
-		if parentWidth <= 0 or parentWidth < COMPACT_BREAKPOINT then
-			return UDim2.new(1, 0, 0, 26)
-		end
-
-		return UDim2.new(0.5, -(COLUMN_GAP / 2), 0, 26)
-	end
 
 	Section.Layout = New("UIListLayout", {
 		Padding = UDim.new(0, 5),
@@ -31,7 +20,7 @@ return function(Title, Parent)
 
 	Section.Root = New("Frame", {
 		BackgroundTransparency = 0.89, -- Base transparency, will use ThemeTag
-		Size = getSectionWidth(),
+		Size = UDim2.new(1, 0, 0, 26),
 		LayoutOrder = 7,
 		Parent = Parent,
 		ThemeTag = {
@@ -74,19 +63,10 @@ return function(Title, Parent)
 		Section.Container,
 	})
 
-	local function updateSectionSize()
-		local width = getSectionWidth()
-		Section.Root.Size = UDim2.new(width.X.Scale, width.X.Offset, 0, Section.Root.Size.Y.Offset)
-	end
-
 	Creator.AddSignal(Section.Layout:GetPropertyChangedSignal("AbsoluteContentSize"), function()
 		Section.Container.Size = UDim2.new(1, 0, 0, Section.Layout.AbsoluteContentSize.Y)
 		-- Calculate total height: PaddingTop + TitleHeight + Spacing + ContentSize + PaddingBottom
-		local width = getSectionWidth()
-		Section.Root.Size = UDim2.new(width.X.Scale, width.X.Offset, 0, 12 + 18 + 14 + Section.Layout.AbsoluteContentSize.Y + 12)
+		Section.Root.Size = UDim2.new(Section.Root.Size.X.Scale, Section.Root.Size.X.Offset, 0, 12 + 18 + 14 + Section.Layout.AbsoluteContentSize.Y + 12)
 	end)
-
-	Creator.AddSignal(Parent:GetPropertyChangedSignal("AbsoluteSize"), updateSectionSize)
-	updateSectionSize()
 	return Section
 end
