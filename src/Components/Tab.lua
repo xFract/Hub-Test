@@ -94,8 +94,12 @@ function TabModule:New(Title, Icon, Parent)
 	})
 
 	local ContainerLayout = New("UIListLayout", {
-		Padding = UDim.new(0, 5),
+		Padding = UDim.new(0, 8),
 		SortOrder = Enum.SortOrder.LayoutOrder,
+		FillDirection = Enum.FillDirection.Horizontal,
+		Wraps = true,
+		HorizontalAlignment = Enum.HorizontalAlignment.Left,
+		VerticalAlignment = Enum.VerticalAlignment.Top,
 	})
 
 	Tab.ContainerFrame = New("ScrollingFrame", {
