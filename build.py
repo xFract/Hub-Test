@@ -12,18 +12,27 @@ Command = Union[str, Sequence[str]]
 
 
 def resolve_command(name: str) -> Optional[str]:
+    # 1. PATH から直接検索
     direct = shutil.which(name)
     if direct:
         return direct
 
-    if os.name == "nt":
-        local_exe = AFTMAN_BIN / f"{name}.exe"
-        if local_exe.exists():
-            return str(local_exe)
+    # 2. カスタムパス候補
+    search_dirs = [
+        AFTMAN_BIN,
+        Path.home() / ".aftman" / "bin",
+        Path(r"D:\APP\aftman-0.3.0-windows-x86_64"),
+    ]
 
-    local_cmd = AFTMAN_BIN / name
-    if local_cmd.exists():
-        return str(local_cmd)
+    for directory in search_dirs:
+        if os.name == "nt":
+            local_exe = directory / f"{name}.exe"
+            if local_exe.exists():
+                return str(local_exe)
+        
+        local_cmd = directory / name
+        if local_cmd.exists():
+            return str(local_cmd)
 
     return None
 
@@ -32,6 +41,12 @@ def ensure_command(name: str) -> str:
     resolved = resolve_command(name)
     if resolved:
         return resolved
+
+    # aftman 自体が見つからない場合のメッセージを親切にする
+    if name == "aftman":
+        raise RuntimeError(
+            "aftman が見つかりません。https://github.com/LPGhatguy/aftman からインストールしてください。"
+        )
 
     raise RuntimeError(
         f"'{name}' が見つかりません。PATH に追加するか、`aftman install` を実行して .aftman/bin を用意してください。"
@@ -65,6 +80,26 @@ def main():
     os.chdir(REPO_ROOT)
 
     DIST_DIR.mkdir(exist_ok=True)
+
+    required_tools = ["rojo", "lune", "darklua"]
+    missing_tools = [t for t in required_tools if resolve_command(t) is None]
+
+    if missing_tools:
+        print(f"[WARN] 以下のツールが見つかりません: {', '.join(missing_tools)}")
+        aftman = resolve_command("aftman")
+        if aftman:
+            print("[INFO] aftman install を実行してツールの復旧を試みます...")
+            try:
+                # 初期環境での信頼確認エラーを避けるため --no-trust-check を付与
+                subprocess.run([aftman, "install", "--no-trust-check"], check=True, cwd=REPO_ROOT)
+                print("[OK] ツールのインストールが完了しました。")
+            except subprocess.CalledProcessError:
+                print("[ERROR] aftman install に失敗しました。手動で実行してください。")
+                sys.exit(1)
+        else:
+            print("[ERROR] aftman 自体が見つからないため、自動インストールができません。")
+            print("https://github.com/LPGhatguy/aftman から aftman をインストールしてください。")
+            sys.exit(1)
 
     try:
         rojo = ensure_command("rojo")

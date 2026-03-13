@@ -9,7 +9,8 @@ REPO_ROOT = Path(__file__).resolve().parent
 Command = Union[str, Sequence[str]]
 
 
-def resolve_python():
+def resolve_python_command():
+    """ビルド用のPythonコマンドとスクリプトパスを返す"""
     return [sys.executable, str(REPO_ROOT / "build.py")]
 
 
@@ -55,7 +56,7 @@ def main():
     os.chdir(REPO_ROOT)
 
     print("\n[STEP 1] プロジェクトのビルド")
-    if not run_command(resolve_python(), "ビルドプロセスの実行"):
+    if not run_command(resolve_python_command(), "ビルドプロセスの実行"):
         print("\n[FAILED] ビルドに失敗したため、プッシュを中止します。")
         sys.exit(1)
 
