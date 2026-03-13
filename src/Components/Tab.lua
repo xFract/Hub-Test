@@ -16,7 +16,7 @@ local TabModule = {
 }
 
 local COLUMN_GAP = 8
-local COLUMN_BREAKPOINT = 760
+local COLUMN_BREAKPOINT = 900
 
 local function bindCanvasSize(ScrollFrame, Layout)
 	Creator.AddSignal(Layout:GetPropertyChangedSignal("AbsoluteContentSize"), function()

@@ -200,6 +200,7 @@ function DashboardManager:BuildDashboardTab(tab, config)
 		label.Position = props.Position or UDim2.new(0, 0, 0, 0)
 		label.RichText = props.RichText or false
 		label.TextWrapped = props.TextWrapped or false
+		label.TextTruncate = props.TextTruncate or Enum.TextTruncate.None
 		label.Parent = props.Parent
 		label.LayoutOrder = props.LayoutOrder or 0
 		if props.AnchorPoint then
@@ -258,6 +259,8 @@ function DashboardManager:BuildDashboardTab(tab, config)
 		Name = "WelcomeCard",
 	})
 
+	local welcomeLeftWidthOffset = 180
+
 	-- アバター画像
 	local avatarImage = Instance.new("ImageLabel")
 	avatarImage.Size = UDim2.fromOffset(50, 50)
@@ -283,8 +286,9 @@ function DashboardManager:BuildDashboardTab(tab, config)
 		TextSize = 18,
 		Font = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Bold),
 		TextColor3 = Color3.fromRGB(240, 250, 255),
-		Size = UDim2.new(1, -130, 0, 22),
+		Size = UDim2.new(1, -welcomeLeftWidthOffset, 0, 22),
 		Position = UDim2.fromOffset(60, 2),
+		TextTruncate = Enum.TextTruncate.AtEnd,
 		Parent = welcomeCard,
 	})
 
@@ -292,8 +296,9 @@ function DashboardManager:BuildDashboardTab(tab, config)
 		Text = "Welcome, " .. localPlayer.Name,
 		TextSize = 11,
 		TextColor3 = Color3.fromRGB(160, 170, 180),
-		Size = UDim2.new(1, -130, 0, 14),
+		Size = UDim2.new(1, -welcomeLeftWidthOffset, 0, 14),
 		Position = UDim2.fromOffset(60, 28),
+		TextTruncate = Enum.TextTruncate.AtEnd,
 		Parent = welcomeCard,
 	})
 
@@ -304,8 +309,9 @@ function DashboardManager:BuildDashboardTab(tab, config)
 		Font = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.SemiBold),
 		TextColor3 = Color3.fromRGB(200, 210, 220),
 		TextXAlignment = Enum.TextXAlignment.Right,
-		Size = UDim2.new(0, 110, 0, 20),
-		Position = UDim2.new(1, -122, 0, 2),
+		Size = UDim2.new(0, 108, 0, 20),
+		Position = UDim2.new(1, -108, 0, 2),
+		AnchorPoint = Vector2.new(1, 0),
 		Parent = welcomeCard,
 	})
 
@@ -314,8 +320,9 @@ function DashboardManager:BuildDashboardTab(tab, config)
 		TextSize = 11,
 		TextColor3 = Color3.fromRGB(140, 150, 160),
 		TextXAlignment = Enum.TextXAlignment.Right,
-		Size = UDim2.new(0, 110, 0, 14),
-		Position = UDim2.new(1, -122, 0, 26),
+		Size = UDim2.new(0, 108, 0, 14),
+		Position = UDim2.new(1, -108, 0, 26),
+		AnchorPoint = Vector2.new(1, 0),
 		Parent = welcomeCard,
 	})
 
@@ -394,7 +401,7 @@ function DashboardManager:BuildDashboardTab(tab, config)
 
 	-- Server カード（全幅）
 	local serverCard = MakeCard({
-		Size = UDim2.new(1, 0, 0, 160),
+		Size = UDim2.new(1, 0, 0, 184),
 		LayoutOrder = 1,
 		Name = "ServerCard",
 		Parent = row2,
@@ -408,35 +415,52 @@ function DashboardManager:BuildDashboardTab(tab, config)
 		Text = "Currently Playing " .. gameName,
 		TextSize = 10,
 		TextColor3 = Color3.fromRGB(140, 150, 160),
-		Size = UDim2.new(1, 0, 0, 12),
+		Size = UDim2.new(1, 0, 0, 24),
 		Position = UDim2.fromOffset(0, 22),
 		TextWrapped = true,
 		Parent = serverCard,
 	})
 
 	-- サーバー情報グリッド
-	local gridY = 40
+	local statsGrid = Instance.new("Frame")
+	statsGrid.Name = "StatsGrid"
+	statsGrid.BackgroundTransparency = 1
+	statsGrid.Position = UDim2.fromOffset(0, 52)
+	statsGrid.Size = UDim2.new(1, 0, 0, 110)
+	statsGrid.Parent = serverCard
+
+	local statsLayout = Instance.new("UIGridLayout")
+	statsLayout.CellPadding = UDim2.fromOffset(8, 8)
+	statsLayout.CellSize = UDim2.new(0.5, -4, 0, 30)
+	statsLayout.FillDirectionMaxCells = 2
+	statsLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
+	statsLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	statsLayout.Parent = statsGrid
+
 	local function AddServerStat(label, value, col, row)
-		local xOffset = col * 110
-		local yOffset = gridY + (row * 36)
+		local statFrame = Instance.new("Frame")
+		statFrame.BackgroundTransparency = 1
+		statFrame.LayoutOrder = row * 2 + col + 1
+		statFrame.Parent = statsGrid
 
 		MakeLabel({
 			Text = label,
 			TextSize = 12,
 			Font = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.SemiBold),
 			TextColor3 = Color3.fromRGB(220, 230, 240),
-			Size = UDim2.new(0, 100, 0, 14),
-			Position = UDim2.fromOffset(xOffset, yOffset),
-			Parent = serverCard,
+			Size = UDim2.new(1, 0, 0, 14),
+			Position = UDim2.fromOffset(0, 0),
+			TextTruncate = Enum.TextTruncate.AtEnd,
+			Parent = statFrame,
 		})
 		local valueLabel = MakeLabel({
 			Text = value,
 			TextSize = 10,
 			TextColor3 = Color3.fromRGB(140, 150, 160),
-			Size = UDim2.new(0, 100, 0, 12),
-			Position = UDim2.fromOffset(xOffset, yOffset + 16),
+			Size = UDim2.new(1, 0, 0, 24),
+			Position = UDim2.fromOffset(0, 16),
 			TextWrapped = true,
-			Parent = serverCard,
+			Parent = statFrame,
 		})
 		return valueLabel
 	end
@@ -490,3 +514,4 @@ function DashboardManager:BuildDashboardTab(tab, config)
 end
 
 return DashboardManager
+
