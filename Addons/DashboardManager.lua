@@ -80,7 +80,7 @@ function DashboardManager:BuildDashboardTab(tab, config)
 	local discordUrl = config.Discord or ""
 
 	local localPlayer = Players.LocalPlayer
-	local container = tab.ContainerFrame or tab.Container
+	local container = tab.SingleScrollFrame or tab.ContainerFrame or tab.Container
 
 	-- ===== プレースアイコンを背景画像として配置 =====
 	-- ScrollingFrameの親（ContainerHolder相当）に配置し、UIListLayoutの影響を受けないようにする
