@@ -79,6 +79,11 @@ def main():
     print("[INFO] Fract-Hub のビルドを開始します...")
     os.chdir(REPO_ROOT)
 
+    # 外部ツール (darklua等) が PATH から見つかるよう ~/.aftman/bin を追加
+    aftman_bin_str = str(Path.home() / ".aftman" / "bin")
+    if aftman_bin_str not in os.environ["PATH"]:
+        os.environ["PATH"] = aftman_bin_str + os.pathsep + os.environ["PATH"]
+
     DIST_DIR.mkdir(exist_ok=True)
 
     required_tools = ["rojo", "lune", "darklua"]
