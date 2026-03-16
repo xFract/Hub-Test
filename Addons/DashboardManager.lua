@@ -259,7 +259,9 @@ function DashboardManager:BuildDashboardTab(tab, config)
 		Name = "WelcomeCard",
 	})
 
-	local welcomeLeftWidthOffset = 180
+	local welcomeLeftWidthOffset = 192
+	local welcomeRightMargin = 12
+	local welcomeTimeWidth = 108
 
 	-- アバター画像
 	local avatarImage = Instance.new("ImageLabel")
@@ -309,8 +311,8 @@ function DashboardManager:BuildDashboardTab(tab, config)
 		Font = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.SemiBold),
 		TextColor3 = Color3.fromRGB(200, 210, 220),
 		TextXAlignment = Enum.TextXAlignment.Right,
-		Size = UDim2.new(0, 108, 0, 20),
-		Position = UDim2.new(1, -108, 0, 2),
+		Size = UDim2.new(0, welcomeTimeWidth, 0, 20),
+		Position = UDim2.new(1, -welcomeRightMargin, 0, 2),
 		AnchorPoint = Vector2.new(1, 0),
 		Parent = welcomeCard,
 	})
@@ -320,8 +322,8 @@ function DashboardManager:BuildDashboardTab(tab, config)
 		TextSize = 11,
 		TextColor3 = Color3.fromRGB(140, 150, 160),
 		TextXAlignment = Enum.TextXAlignment.Right,
-		Size = UDim2.new(0, 108, 0, 14),
-		Position = UDim2.new(1, -108, 0, 26),
+		Size = UDim2.new(0, welcomeTimeWidth, 0, 14),
+		Position = UDim2.new(1, -welcomeRightMargin, 0, 26),
 		AnchorPoint = Vector2.new(1, 0),
 		Parent = welcomeCard,
 	})

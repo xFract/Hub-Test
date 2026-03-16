@@ -9,6 +9,7 @@ return function(Parent, Acrylic)
 	local Textbox = {}
 
 	Textbox.Input = New("TextBox", {
+		Font = Enum.Font.Gotham,
 		FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json"),
 		TextColor3 = Color3.fromRGB(200, 200, 200),
 		TextSize = 14,
