@@ -499,6 +499,21 @@ function Element:New(Idx, Config)
 			local pressPosition
 			local pressCanvasPosition
 			local dragging = false
+			local function UpdateDraggingState(currentPosition)
+				if not pressPosition or not pressCanvasPosition then
+					return
+				end
+
+				local delta = currentPosition - pressPosition
+				local canvasDelta = DropdownScrollFrame.CanvasPosition - pressCanvasPosition
+				if math.abs(delta.X) > CLICK_DRAG_THRESHOLD
+					or math.abs(delta.Y) > CLICK_DRAG_THRESHOLD
+					or math.abs(canvasDelta.X) > 0
+					or math.abs(canvasDelta.Y) > CLICK_DRAG_THRESHOLD
+				then
+					dragging = true
+				end
+			end
 
 			Creator.AddSignal(Button.InputBegan, function(Input)
 				if
@@ -517,15 +532,15 @@ function Element:New(Idx, Config)
 					return
 				end
 
-				local delta = Input.Position - pressPosition
-				local canvasDelta = DropdownScrollFrame.CanvasPosition - pressCanvasPosition
-				if math.abs(delta.X) > CLICK_DRAG_THRESHOLD
-					or math.abs(delta.Y) > CLICK_DRAG_THRESHOLD
-					or math.abs(canvasDelta.X) > 0
-					or math.abs(canvasDelta.Y) > CLICK_DRAG_THRESHOLD
-				then
-					dragging = true
+				UpdateDraggingState(Input.Position)
+			end)
+
+			Creator.AddSignal(UserInputService.InputChanged, function(Input)
+				if Input ~= pressInput or not pressPosition then
+					return
 				end
+
+				UpdateDraggingState(Input.Position)
 			end)
 
 			Creator.AddSignal(Button.InputEnded, function(Input)
@@ -533,6 +548,7 @@ function Element:New(Idx, Config)
 					return
 				end
 
+				UpdateDraggingState(Input.Position)
 				local shouldCommit = not dragging
 				pressInput = nil
 				pressPosition = nil
