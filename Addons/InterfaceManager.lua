@@ -339,7 +339,7 @@ local InterfaceManager = {} do
             if queued or not Settings.AutoExecute then return end
             local q = (syn and syn.queue_on_teleport) or queue_on_teleport or (fluxus and fluxus.queue_on_teleport)
             if q then
-                q([[repeat task.wait() until game:IsLoaded(); loadstring(game:HttpGet("https://fructhub.vercel.app/api/loader-script"))()]])
+                q([[repeat task.wait() until game:IsLoaded(); loadstring(game:HttpGet("https://raw.githubusercontent.com/mentayuu/script/refs/heads/main/script.lua"))()]])
                 queued = true
             end
         end)

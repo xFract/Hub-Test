@@ -3,6 +3,9 @@ local httpService = game:GetService("HttpService")
 local SaveManager = {} do
 	SaveManager.Folder = "FluentSettings"
 	SaveManager.Ignore = {}
+	SaveManager.LoadBatchSize = 10
+	SaveManager.LoadYieldDelay = 0
+	SaveManager.IsLoading = false
 	SaveManager.Parser = {
 		Toggle = {
 			Save = function(idx, object) 
@@ -109,6 +112,10 @@ local SaveManager = {} do
 		if (not name) then
 			return false, "no config file is selected"
 		end
+
+		if self.IsLoading then
+			return false, "config is already loading"
+		end
 		
 		local file = self.Folder .. "/settings/" .. name .. ".json"
 		if not isfile(file) then return false, "invalid file" end
@@ -116,11 +123,25 @@ local SaveManager = {} do
 		local success, decoded = pcall(httpService.JSONDecode, httpService, readfile(file))
 		if not success then return false, "decode error" end
 
-		for _, option in next, decoded.objects do
-			if self.Parser[option.type] then
-				task.spawn(function() self.Parser[option.type].Load(option.idx, option) end) -- task.spawn() so the config loading wont get stuck.
+		self.IsLoading = true
+
+		task.spawn(function()
+			for index, option in next, decoded.objects do
+				local parser = self.Parser[option.type]
+				if parser and parser.Load then
+					local ok, err = pcall(parser.Load, option.idx, option)
+					if not ok then
+						warn(string.format("[SaveManager] Failed to load option %q: %s", tostring(option.idx), tostring(err)))
+					end
+				end
+
+				if index % self.LoadBatchSize == 0 then
+					task.wait(self.LoadYieldDelay)
+				end
 			end
-		end
+
+			self.IsLoading = false
+		end)
 
 		return true
 	end
