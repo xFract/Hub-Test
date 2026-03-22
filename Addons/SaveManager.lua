@@ -6,6 +6,7 @@ local SaveManager = {} do
 	SaveManager.LoadBatchSize = 10
 	SaveManager.LoadYieldDelay = 0
 	SaveManager.IsLoading = false
+	SaveManager.SuppressCallbacksWhileLoading = true
 	SaveManager.Parser = {
 		Toggle = {
 			Save = function(idx, object) 
@@ -81,6 +82,30 @@ local SaveManager = {} do
 		self:BuildFolderTree()
 	end
 
+	function SaveManager:SetCallbackSuppression(enabled)
+		self.SuppressCallbacksWhileLoading = enabled
+	end
+
+	function SaveManager:WithSuppressedCallbacks(callback)
+		if not self.SuppressCallbacksWhileLoading or not self.Library then
+			return callback()
+		end
+
+		local library = self.Library
+		local originalSafeCallback = library.SafeCallback
+
+		library.SafeCallback = function() end
+
+		local ok, result = pcall(callback)
+		library.SafeCallback = originalSafeCallback
+
+		if not ok then
+			error(result)
+		end
+
+		return result
+	end
+
 	function SaveManager:Save(name)
 		if (not name) then
 			return false, "no config file is selected"
@@ -126,18 +151,26 @@ local SaveManager = {} do
 		self.IsLoading = true
 
 		task.spawn(function()
-			for index, option in next, decoded.objects do
-				local parser = self.Parser[option.type]
-				if parser and parser.Load then
-					local ok, err = pcall(parser.Load, option.idx, option)
-					if not ok then
-						warn(string.format("[SaveManager] Failed to load option %q: %s", tostring(option.idx), tostring(err)))
-					end
-				end
+			local ok, err = pcall(function()
+				self:WithSuppressedCallbacks(function()
+					for index, option in next, decoded.objects do
+						local parser = self.Parser[option.type]
+						if parser and parser.Load then
+							local success, loadErr = pcall(parser.Load, option.idx, option)
+							if not success then
+								warn(string.format("[SaveManager] Failed to load option %q: %s", tostring(option.idx), tostring(loadErr)))
+							end
+						end
 
-				if index % self.LoadBatchSize == 0 then
-					task.wait(self.LoadYieldDelay)
-				end
+						if index % self.LoadBatchSize == 0 then
+							task.wait(self.LoadYieldDelay)
+						end
+					end
+				end)
+			end)
+
+			if not ok then
+				warn(string.format("[SaveManager] Failed to finish loading config %q: %s", tostring(name), tostring(err)))
 			end
 
 			self.IsLoading = false
