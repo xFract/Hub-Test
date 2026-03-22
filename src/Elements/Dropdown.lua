@@ -1,4 +1,4 @@
-local TweenService = game:GetService("TweenService")
+﻿local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local Mouse = game:GetService("Players").LocalPlayer:GetMouse()
 local Camera = game:GetService("Workspace").CurrentCamera
@@ -60,6 +60,7 @@ function Element:New(Idx, Config)
 		Value = Config.Default,
 		Multi = Config.Multi,
 		Buttons = {},
+		ButtonsBuilt = false,
 		Opened = false,
 		Type = "Dropdown",
 		Callback = Config.Callback or function() end,
@@ -71,7 +72,7 @@ function Element:New(Idx, Config)
 	Dropdown.SetTitle = DropdownFrame.SetTitle
 	Dropdown.SetDesc = DropdownFrame.SetDesc
 
-	-- 選択中の値を表示するラベル
+	-- 驕ｸ謚樔ｸｭ縺ｮ蛟､繧定｡ｨ遉ｺ縺吶ｋ繝ｩ繝吶Ν
 	local DropdownDisplay = New("TextLabel", {
 		FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal),
 		Text = "Value",
@@ -89,9 +90,8 @@ function Element:New(Idx, Config)
 		},
 	})
 
-	-- 上下矢印アイコン（chevrons-up-downに相当する文字表記）
-	local DropdownIco = New("TextLabel", {
-		Text = "⇅",
+	-- 荳贋ｸ狗泙蜊ｰ繧｢繧､繧ｳ繝ｳ・・hevrons-up-down縺ｫ逶ｸ蠖薙☆繧区枚蟄苓｡ｨ險假ｼ・	local DropdownIco = New("TextLabel", {
+		Text = "竍・,
 		TextSize = 14,
 		FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal),
 		Size = UDim2.fromOffset(16, 16),
@@ -103,7 +103,7 @@ function Element:New(Idx, Config)
 		},
 	})
 
-	-- ドロップダウンのトリガーボタン
+	-- 繝峨Ο繝・・繝繧ｦ繝ｳ縺ｮ繝医Μ繧ｬ繝ｼ繝懊ち繝ｳ
 	local DropdownInner = New("TextButton", {
 		Size = UDim2.fromOffset(160, 30),
 		Position = UDim2.new(1, -10, 0.5, 0),
@@ -128,7 +128,7 @@ function Element:New(Idx, Config)
 		DropdownDisplay,
 	})
 
-	-- ===== ポップアップリスト内の検索バー =====
+	-- ===== 繝昴ャ繝励い繝・・繝ｪ繧ｹ繝亥・縺ｮ讀懃ｴ｢繝舌・ =====
 	local SearchIndicator = New("Frame", {
 		Size = UDim2.new(1, -4, 0, 1),
 		Position = UDim2.new(0, 2, 1, 0),
@@ -172,13 +172,13 @@ function Element:New(Idx, Config)
 		SearchBox,
 	})
 
-	-- ===== スクロール可能な選択肢リスト =====
+	-- ===== 繧ｹ繧ｯ繝ｭ繝ｼ繝ｫ蜿ｯ閭ｽ縺ｪ驕ｸ謚櫁い繝ｪ繧ｹ繝・=====
 	local DropdownListLayout = New("UIListLayout", {
 		Padding = UDim.new(0, 3),
 	})
 
 	local DropdownScrollFrame = New("ScrollingFrame", {
-		-- 検索バー(28px) + 上余白(5px) + 間隔(5px) = 38px分だけ上から空ける
+		-- 讀懃ｴ｢繝舌・(28px) + 荳贋ｽ咏區(5px) + 髢馴囈(5px) = 38px蛻・□縺台ｸ翫°繧臥ｩｺ縺代ｋ
 		Size = UDim2.new(1, -5, 1, -43),
 		Position = UDim2.fromOffset(5, 38),
 		BackgroundTransparency = 1,
@@ -196,8 +196,7 @@ function Element:New(Idx, Config)
 		DropdownListLayout,
 	})
 
-	-- ポップアップの外枠（DropdownHolder）
-	local DropdownHolderFrame = New("Frame", {
+	-- 繝昴ャ繝励い繝・・縺ｮ螟匁棧・・ropdownHolder・・	local DropdownHolderFrame = New("Frame", {
 		Size = UDim2.fromScale(1, 0.6),
 		ThemeTag = {
 			BackgroundColor3 = "DropdownHolder",
@@ -214,7 +213,7 @@ function Element:New(Idx, Config)
 				Color = "DropdownBorder",
 			},
 		}),
-		-- ドロップシャドウ
+		-- 繝峨Ο繝・・繧ｷ繝｣繝峨え
 		New("ImageLabel", {
 			BackgroundTransparency = 1,
 			Image = "http://www.roblox.com/asset/?id=5554236805",
@@ -227,8 +226,7 @@ function Element:New(Idx, Config)
 		}),
 	})
 
-	-- ポップアップのキャンバス（位置制御用）
-	local DropdownHolderCanvas = New("Frame", {
+	-- 繝昴ャ繝励い繝・・縺ｮ繧ｭ繝｣繝ｳ繝舌せ・井ｽ咲ｽｮ蛻ｶ蠕｡逕ｨ・・	local DropdownHolderCanvas = New("Frame", {
 		BackgroundTransparency = 1,
 		Size = UDim2.fromOffset(170, 300),
 		Parent = self.Library.GUI,
@@ -241,16 +239,16 @@ function Element:New(Idx, Config)
 	})
 	table.insert(Library.OpenFrames, DropdownHolderCanvas)
 
-	-- ポップアップをドロップダウンボタンの直下に配置する
+	-- 繝昴ャ繝励い繝・・繧偵ラ繝ｭ繝・・繝繧ｦ繝ｳ繝懊ち繝ｳ縺ｮ逶ｴ荳九↓驟咲ｽｮ縺吶ｋ
 	local function RecalculateListPosition()
 		local buttonPos = DropdownInner.AbsolutePosition
 		local buttonSize = DropdownInner.AbsoluteSize
 
-		-- ボタン直下を基準位置とする
+		-- 繝懊ち繝ｳ逶ｴ荳九ｒ蝓ｺ貅紋ｽ咲ｽｮ縺ｨ縺吶ｋ
 		local targetY = buttonPos.Y + buttonSize.Y + 2
 		local targetX = buttonPos.X
 
-		-- 画面下にはみ出す場合は上方向に展開する
+		-- 逕ｻ髱｢荳九↓縺ｯ縺ｿ蜃ｺ縺吝ｴ蜷医・荳頑婿蜷代↓螻暮幕縺吶ｋ
 		if targetY + DropdownHolderCanvas.AbsoluteSize.Y > Camera.ViewportSize.Y - 10 then
 			targetY = buttonPos.Y - DropdownHolderCanvas.AbsoluteSize.Y - 2
 		end
@@ -258,19 +256,17 @@ function Element:New(Idx, Config)
 		DropdownHolderCanvas.Position = UDim2.fromOffset(targetX, targetY)
 	end
 
-	-- リストの横幅をボタン幅に合わせつつ、テキスト幅も考慮する
+	-- 繝ｪ繧ｹ繝医・讓ｪ蟷・ｒ繝懊ち繝ｳ蟷・↓蜷医ｏ縺帙▽縺､縲√ユ繧ｭ繧ｹ繝亥ｹ・ｂ閠・・縺吶ｋ
 	local ListSizeX = 0
-	-- 表示上限を5項目分に制限する（各32px + padding 3px = 35px/項目）
-	local MAX_VISIBLE_ITEMS = 5
+	-- 陦ｨ遉ｺ荳企剞繧・鬆・岼蛻・↓蛻ｶ髯舌☆繧具ｼ亥推32px + padding 3px = 35px/鬆・岼・・	local MAX_VISIBLE_ITEMS = 5
 	local ITEM_HEIGHT = 35
-	local SEARCH_BAR_HEIGHT = 43 -- 検索バー(28px) + 上余白(5px) + 間隔(10px)
+	local SEARCH_BAR_HEIGHT = 43 -- 讀懃ｴ｢繝舌・(28px) + 荳贋ｽ咏區(5px) + 髢馴囈(10px)
 	local MAX_LIST_HEIGHT = (MAX_VISIBLE_ITEMS * ITEM_HEIGHT) + SEARCH_BAR_HEIGHT + 10
 
 	local function RecalculateListSize()
 		local minWidth = math.max(DropdownInner.AbsoluteSize.X, ListSizeX, 170)
-		-- コンテンツ全体の高さ（検索バー + リスト項目 + 余白）
-		local contentHeight = DropdownListLayout.AbsoluteContentSize.Y + SEARCH_BAR_HEIGHT + 10
-		-- 5項目分を超える場合はスクロール可能にする
+		-- 繧ｳ繝ｳ繝・Φ繝・・菴薙・鬮倥＆・域､懃ｴ｢繝舌・ + 繝ｪ繧ｹ繝磯・岼 + 菴咏區・・		local contentHeight = DropdownListLayout.AbsoluteContentSize.Y + SEARCH_BAR_HEIGHT + 10
+		-- 5鬆・岼蛻・ｒ雜・∴繧句ｴ蜷医・繧ｹ繧ｯ繝ｭ繝ｼ繝ｫ蜿ｯ閭ｽ縺ｫ縺吶ｋ
 		DropdownHolderCanvas.Size = UDim2.fromOffset(minWidth, math.min(contentHeight, MAX_LIST_HEIGHT))
 	end
 
@@ -291,14 +287,12 @@ function Element:New(Idx, Config)
 		end
 	end)
 
-	-- ポップアップ外クリックで閉じる判定（ドロップダウンボタン自体のクリックは除外）
-	Creator.AddSignal(UserInputService.InputBegan, function(Input)
+	-- 繝昴ャ繝励い繝・・螟悶け繝ｪ繝・け縺ｧ髢峨§繧句愛螳夲ｼ医ラ繝ｭ繝・・繝繧ｦ繝ｳ繝懊ち繝ｳ閾ｪ菴薙・繧ｯ繝ｪ繝・け縺ｯ髯､螟厄ｼ・	Creator.AddSignal(UserInputService.InputBegan, function(Input)
 		if
 			Input.UserInputType == Enum.UserInputType.MouseButton1
 			or Input.UserInputType == Enum.UserInputType.Touch
 		then
-			-- ドロップダウンボタン上のクリックは MouseButton1Click に任せるため除外する
-			local btnPos, btnSize = DropdownInner.AbsolutePosition, DropdownInner.AbsoluteSize
+			-- 繝峨Ο繝・・繝繧ｦ繝ｳ繝懊ち繝ｳ荳翫・繧ｯ繝ｪ繝・け縺ｯ MouseButton1Click 縺ｫ莉ｻ縺帙ｋ縺溘ａ髯､螟悶☆繧・			local btnPos, btnSize = DropdownInner.AbsolutePosition, DropdownInner.AbsoluteSize
 			local isOnButton = Mouse.X >= btnPos.X
 				and Mouse.X <= btnPos.X + btnSize.X
 				and Mouse.Y >= btnPos.Y
@@ -319,13 +313,13 @@ function Element:New(Idx, Config)
 		end
 	end)
 
-	-- ===== 検索フィルタリング処理 =====
+	-- ===== 讀懃ｴ｢繝輔ぅ繝ｫ繧ｿ繝ｪ繝ｳ繧ｰ蜃ｦ逅・=====
 	local function FilterDropdownList(searchText)
 		local lowerSearch = string.lower(searchText)
 		for ButtonInstance, Table in next, Dropdown.Buttons do
 			if ButtonInstance:FindFirstChild("ButtonLabel") then
 				local labelText = string.lower(ButtonInstance.ButtonLabel.Text)
-				-- 検索テキストが空なら全表示、そうでなければ部分一致でフィルタ
+				-- 讀懃ｴ｢繝・く繧ｹ繝医′遨ｺ縺ｪ繧牙・陦ｨ遉ｺ縲√◎縺・〒縺ｪ縺代ｌ縺ｰ驛ｨ蛻・ｸ閾ｴ縺ｧ繝輔ぅ繝ｫ繧ｿ
 				local shouldShow = (lowerSearch == "" or string.find(labelText, lowerSearch, 1, true) ~= nil)
 				ButtonInstance.Visible = shouldShow
 			end
@@ -340,10 +334,19 @@ function Element:New(Idx, Config)
 	end)
 
 	local ScrollFrame = self.ScrollFrame
+	local function EnsureButtonsBuilt()
+		if Dropdown.ButtonsBuilt then
+			return
+		end
+
+		Dropdown:BuildDropdownList()
+	end
+
 	function Dropdown:Open()
+		EnsureButtonsBuilt()
 		Dropdown.Opened = true
 		ScrollFrame.ScrollingEnabled = false
-		-- 検索テキストをクリアして全項目を表示
+		-- 讀懃ｴ｢繝・く繧ｹ繝医ｒ繧ｯ繝ｪ繧｢縺励※蜈ｨ鬆・岼繧定｡ｨ遉ｺ
 		SearchBox.Text = ""
 		FilterDropdownList("")
 		DropdownHolderCanvas.Visible = true
@@ -418,7 +421,7 @@ function Element:New(Idx, Config)
 
 			Count = Count + 1
 
-			-- 選択状態を示す左端のアクセントバー
+			-- 驕ｸ謚樒憾諷九ｒ遉ｺ縺吝ｷｦ遶ｯ縺ｮ繧｢繧ｯ繧ｻ繝ｳ繝医ヰ繝ｼ
 			local ButtonSelector = New("Frame", {
 				Size = UDim2.fromOffset(4, 14),
 				BackgroundColor3 = Color3.fromRGB(76, 194, 255),
@@ -616,6 +619,7 @@ function Element:New(Idx, Config)
 		ListSizeX = ListSizeX + 30
 
 		Dropdown.Buttons = Buttons
+		Dropdown.ButtonsBuilt = true
 		Dropdown:RefreshButtons()
 		Dropdown:Display()
 		RecalculateCanvasSize()
@@ -627,7 +631,11 @@ function Element:New(Idx, Config)
 			Dropdown.Values = NewValues
 		end
 
-		Dropdown:BuildDropdownList()
+		if Dropdown.ButtonsBuilt then
+			Dropdown:BuildDropdownList()
+		else
+			Dropdown:Display()
+		end
 	end
 
 	function Dropdown:OnChanged(Func)
@@ -655,7 +663,9 @@ function Element:New(Idx, Config)
 		end
 
 		Dropdown.Value = nextValue
-		Dropdown:RefreshButtons()
+		if Dropdown.ButtonsBuilt then
+			Dropdown:RefreshButtons()
+		end
 		Dropdown:Display()
 
 		Library:SafeCallback(Dropdown.Callback, Dropdown.Value)
@@ -667,7 +677,6 @@ function Element:New(Idx, Config)
 		Library.Options[Idx] = nil
 	end
 
-	Dropdown:BuildDropdownList()
 	Dropdown:Display()
 
 	local Defaults = {}
@@ -692,6 +701,9 @@ function Element:New(Idx, Config)
 		for i = 1, #Defaults do
 			local Index = Defaults[i]
 			if Config.Multi then
+				if type(Dropdown.Value) ~= 'table' then
+					Dropdown.Value = {}
+				end
 				Dropdown.Value[Dropdown.Values[Index]] = true
 			else
 				Dropdown.Value = Dropdown.Values[Index]
@@ -702,7 +714,6 @@ function Element:New(Idx, Config)
 			end
 		end
 
-		Dropdown:BuildDropdownList()
 		Dropdown:Display()
 	end
 
@@ -711,3 +722,5 @@ function Element:New(Idx, Config)
 end
 
 return Element
+
+

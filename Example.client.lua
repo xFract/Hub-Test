@@ -1,206 +1,137 @@
-local Main = require(game:GetService("ReplicatedStorage"):WaitForChild("Fluent"))
+﻿local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local Window = Main:CreateWindow({
-    Title = "Fluent " .. Main.Version,
-    SubTitle = "by dawid",
+local Fluent = require(ReplicatedStorage:WaitForChild("Fluent"))
+local Addons = ReplicatedStorage:WaitForChild("FluentAddons")
+local SaveManager = require(Addons:WaitForChild("SaveManager"))
+local InterfaceManager = require(Addons:WaitForChild("InterfaceManager"))
+local DashboardManager = require(Addons:WaitForChild("DashboardManager"))
+
+local Window = Fluent:CreateWindow({
+    Title = "Fract Hub",
+    SubTitle = "Local Sample",
     TabWidth = 160,
-    Size = UDim2.fromOffset(580, 460),
+    Size = UDim2.fromOffset(560, 420),
     Acrylic = true,
-    Theme = "Dark"
+    Theme = "Cyan",
+    Logo = "rbxassetid://92450040427767",
+    MinimizeKey = Enum.KeyCode.LeftControl
 })
 
-local Tabs = {
-    Main = Window:AddTab({ Title = "Main", Icon = "box" }),
-    Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
-}
+local Tabs = {}
+Tabs.Dashboard = Window:AddTab({ Title = "Dashboard", Icon = "layout-dashboard" })
+Window:AddTabSection("Main")
+Tabs.Main = Window:AddTab({ Title = "Main", Icon = "box" })
+Window:AddTabSection("Settings")
+Tabs.Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
+Tabs.Config = Window:AddTab({ Title = "Config", Icon = "save" })
 
-do
-    Tabs.Main:AddParagraph({
-        Title = "Paragraph",
-        Content = "This is a paragraph.\nSecond line!"
-    })
+DashboardManager:SetLibrary(Fluent)
+DashboardManager:BuildDashboardTab(Tabs.Dashboard, {
+    GameName = "Local Sample",
+    Developer = "xFract",
+    Discord = "https://discord.gg/c3qbzApe"
+})
 
-    Tabs.Main:AddButton({
-        Title = "Button",
-        Description = "Very important button",
-        Callback = function()
-            Window:Dialog({
-                Title = "Title",
-                Content = "This is a dialog",
-                Buttons = {
-                    {
-                        Title = "Confirm",
-                        Callback = function()
-                            Window:Dialog({
-                                Title = "Another Dialog",
-                                Content = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse mollis dolor eget erat mattis, id mollis mauris cursus. Proin ornare sollicitudin odio, id posuere diam luctus id.",
-                                Buttons = { { Title = "Ok", Callback = function() print("Ok") end} }
-                            })
-                            Main.Options.Toggle:Destroy()
-                        end
-                    },
-                    {
-                        Title = "Cancel",
-                        Callback = function()
-                            print("Cancelled the dialog.")
-                        end
-                    }
+local Options = Fluent.Options
+
+local MainSection = Tabs.Main:AddSection("Main Controls")
+MainSection:AddParagraph({
+    Title = "Overview",
+    Content = "This sample runs entirely from local Rojo modules, including SaveManager, InterfaceManager, and DashboardManager."
+})
+
+local AutoFarmToggle = MainSection:AddToggle("AutoFarm", {
+    Title = "Auto Farm",
+    Default = false
+})
+
+MainSection:AddDropdown("TargetMode", {
+    Title = "Target Mode",
+    Description = "A moderate list for dropdown testing.",
+    Values = { "Closest", "Highest HP", "Lowest HP", "Boss", "Quest", "Event", "Elite", "Manual" },
+    Default = "Closest",
+    Multi = false
+})
+
+MainSection:AddSlider("FarmDistance", {
+    Title = "Distance",
+    Default = 15,
+    Min = 0,
+    Max = 50,
+    Rounding = 0
+})
+
+MainSection:AddInput("SearchText", {
+    Title = "Search Text",
+    Default = "Fluent",
+    Placeholder = "Type here",
+    Finished = false
+})
+
+MainSection:AddButton({
+    Title = "Show Dialog",
+    Description = "Exercises dialog and notification paths.",
+    Callback = function()
+        Window:Dialog({
+            Title = "Local Sample",
+            Content = "This dialog confirms the local sample is wired correctly.",
+            Buttons = {
+                {
+                    Title = "Notify",
+                    Callback = function()
+                        Fluent:Notify({
+                            Title = "Fract Hub",
+                            Content = "Local sample is working.",
+                            Duration = 5
+                        })
+                    end
+                },
+                {
+                    Title = "Close"
                 }
-            })
-        end
-    })
-
-    local Toggle = Tabs.Main:AddToggle("Toggle", {Title = "Toggle", Default = false })
-    
-    local Slider = Tabs.Main:AddSlider("Slider", {
-        Title = "Slider",
-        Description = "This is a slider",
-        Default = 2.0,
-        Min = 0.0,
-        Max = 15.5,
-        Rounding = 1
-    })
-
-
-    local Dropdown = Tabs.Main:AddDropdown("Dropdown", {
-        Title = "Dropdown",
-        Values = {"one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen"},
-        Multi = false,
-        Default = 1,
-    })
-
-    Dropdown:SetValue("four")
-    
-    local MultiDropdown = Tabs.Main:AddDropdown("MultiDropdown", {
-        Title = "Dropdown",
-        Description = "You can select multiple values.",
-        Values = {"one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen"},
-        Multi = true,
-        Default = {"seven", "twelve"},
-    })
-
-    MultiDropdown:SetValue({
-        three = true,
-        five = true,
-        seven = false
-    })
-
-    local Colorpicker = Tabs.Main:AddColorpicker("Colorpicker", {
-        Title = "Colorpicker",
-        Default = Color3.fromRGB(96, 205, 255)
-    })
-
-    local TColorpicker = Tabs.Main:AddColorpicker("TransparencyColorpicker", {
-        Title = "Colorpicker",
-        Description = "but you can change the transparency.",
-        Transparency = 0,
-        Default = Color3.fromRGB(96, 205, 255)
-    })
-
-    local Keybind = Tabs.Main:AddKeybind("Keybind", {
-        Title = "KeyBind",
-        Mode = "Hold",
-        Default = "LeftControl",
-        ChangedCallback = function(New)
-            print("Keybind changed:", New)
-        end
-    })
-
-    local Input = Tabs.Main:AddInput("Input", {
-        Title = "Input",
-        Default = "Default",
-        Numeric = false,
-        Finished = false,
-        Placeholder = "Placeholder text",
-        Callback = function(Value)
-            print("Input changed:", Value)
-        end
-    })
-       
-    Toggle:OnChanged(function()
-        print("Toggle changed:", Main.Options["Toggle"].Value)
-    end)
-
-    Slider:OnChanged(function(Value)
-        print("Slider changed:", Value)
-    end)
-
-    Dropdown:OnChanged(function(Value)
-        print("Dropdown changed:", Value)
-    end)
-
-    MultiDropdown:OnChanged(function(Value)
-        local Values = {}
-        for Value, State in next, Value do
-            table.insert(Values, Value)
-        end
-        print("Mutlidropdown changed:", table.concat(Values, ", "))
-    end)
-
-    Colorpicker:OnChanged(function()
-        print("Colorpicker changed:", TColorpicker.Value)
-    end)
-
-    TColorpicker:OnChanged(function()
-        print(
-            "TColorpicker changed:", TColorpicker.Value,
-            "Transparency:", TColorpicker.Transparency
-        )
-    end)
-
-    task.spawn(function()
-        while true do
-            wait(1)
-            local state = Keybind:GetState()
-            if state then
-                print("Keybind is being held down")
-            end
-            if Main.Unloaded then break end
-        end
-    end)
-
-end
-
-do
-
-    local InterfaceSection = Tabs.Settings:AddSection("Interface")
-
-    InterfaceSection:AddDropdown("InterfaceTheme", {
-        Title = "Theme",
-        Description = "Changes the interface theme.",
-        Values = Main.Themes,
-        Default = Main.Theme,
-        Callback = function(Value)
-            Main:SetTheme(Value)
-        end
-    })
-
-    if Main.UseAcrylic then
-        InterfaceSection:AddToggle("AcrylicToggle", {
-            Title = "Acrylic",
-            Description = "The blurred background requires graphic quality 8+",
-            Default = Main.Acrylic,
-            Callback = function(Value)
-                Main:ToggleAcrylic(Value)
-            end
+            }
         })
     end
+})
 
-    InterfaceSection:AddToggle("TransparentToggle", {
-        Title = "Transparency",
-        Description = "Makes the interface transparent.",
-        Default = Main.Transparency,
-        Callback = function(Value)
-            Main:ToggleTransparency(Value)
-        end
-    })
+local VisualSection = Tabs.Main:AddSection("Visual Controls")
+local Colorpicker = VisualSection:AddColorpicker("AccentColor", {
+    Title = "Accent Color",
+    Default = Color3.fromRGB(96, 205, 255)
+})
 
-    InterfaceSection:AddKeybind("MenuKeybind", { Title = "Minimize Bind", Default = "RightShift" })
-    Main.MinimizeKeybind = Main.Options.MenuKeybind 
-end
+local Keybind = VisualSection:AddKeybind("QuickAction", {
+    Title = "Quick Action",
+    Default = "RightShift",
+    Mode = "Toggle"
+})
 
-Main:Notify({
-    Title = "Fluent",
-    Content = "The script has been loaded.",
-    Duration = 8
+Colorpicker:OnChanged(function()
+    print("Accent Color:", Colorpicker.Value)
+end)
+
+Keybind:OnChanged(function(value)
+    print("Quick Action:", value)
+end)
+
+SaveManager:SetLibrary(Fluent)
+InterfaceManager:SetLibrary(Fluent)
+SaveManager:IgnoreThemeSettings()
+SaveManager:SetFolder("FractHub/LocalSample")
+InterfaceManager:SetFolder("FractHub")
+
+InterfaceManager:BuildInterfaceSection(Tabs.Settings)
+SaveManager:BuildConfigSection(Tabs.Config)
+SaveManager:LoadAutoloadConfig()
+
+Window:SelectTab(1)
+
+AutoFarmToggle:OnChanged(function(value)
+    print("Auto Farm:", value)
+end)
+
+Fluent:Notify({
+    Title = "Fract Hub",
+    Content = "The local sample has been loaded.",
+    Duration = 6
 })
