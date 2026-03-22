@@ -4,10 +4,40 @@ if getgenv().Script_Maid then
     end)
 end
 
-local Fluent = loadstring(game:HttpGet("https://raw.githubusercontent.com/xFract/Hub-Test/main/dist/main.lua"))()
-local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/xFract/Hub-Test/main/Addons/SaveManager.lua"))()
-local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/xFract/Hub-Test/main/Addons/InterfaceManager.lua"))()
-local DashboardManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/xFract/Hub-Test/main/Addons/DashboardManager.lua"))()
+local function loadRemoteModule(url, name, required)
+    local source = game:HttpGet(url)
+    local chunk, compileError = loadstring(source)
+
+    if not chunk then
+        local message = string.format("%s failed to compile: %s", name, tostring(compileError))
+        if required then
+            error(message)
+        end
+
+        warn(message)
+        return nil
+    end
+
+    local ok, result = pcall(chunk)
+    if not ok then
+        local message = string.format("%s failed to initialize: %s", name, tostring(result))
+        if required then
+            error(message)
+        end
+
+        warn(message)
+        return nil
+    end
+
+    return result
+end
+
+local baseUrl = "https://raw.githubusercontent.com/xFract/Hub-Test/main"
+
+local Fluent = loadRemoteModule(baseUrl .. "/dist/main.lua", "Fluent", true)
+local SaveManager = loadRemoteModule(baseUrl .. "/Addons/SaveManager.lua", "SaveManager", true)
+local InterfaceManager = loadRemoteModule(baseUrl .. "/Addons/InterfaceManager.lua", "InterfaceManager", true)
+local DashboardManager = loadRemoteModule(baseUrl .. "/Addons/DashboardManager.lua", "DashboardManager", false)
 
 local Window = Fluent:CreateWindow({
     Title = "Fract Hub",
@@ -21,24 +51,30 @@ local Window = Fluent:CreateWindow({
 })
 
 local Tabs = {}
-Tabs.Dashboard = Window:AddTab({ Title = "Dashboard", Icon = "layout-dashboard" })
+if DashboardManager then
+    Tabs.Dashboard = Window:AddTab({ Title = "Dashboard", Icon = "layout-dashboard" })
+end
 Window:AddTabSection("Main")
 Tabs.Main = Window:AddTab({ Title = "Main", Icon = "box" })
 Window:AddTabSection("Settings")
 Tabs.Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
 Tabs.Config = Window:AddTab({ Title = "Config", Icon = "save" })
 
-DashboardManager:SetLibrary(Fluent)
-DashboardManager:BuildDashboardTab(Tabs.Dashboard, {
-    GameName = "Hub-Test Sample",
-    Developer = "xFract",
-    Discord = "https://discord.gg/c3qbzApe"
-})
+if DashboardManager then
+    DashboardManager:SetLibrary(Fluent)
+    DashboardManager:BuildDashboardTab(Tabs.Dashboard, {
+        GameName = "Hub-Test Sample",
+        Developer = "xFract",
+        Discord = "https://discord.gg/c3qbzApe"
+    })
+end
 
 local MainSection = Tabs.Main:AddSection("Main Controls")
 MainSection:AddParagraph({
     Title = "Overview",
-    Content = "This sample loads Fluent and the addons directly from the Hub-Test GitHub repository."
+    Content = DashboardManager
+        and "This sample loads Fluent and the addons directly from the Hub-Test GitHub repository."
+        or "This sample loads Fluent from Hub-Test. DashboardManager is currently skipped because the remote file failed to load."
 })
 
 local AutoFarmToggle = MainSection:AddToggle("AutoFarm", {
@@ -133,6 +169,8 @@ end)
 
 Fluent:Notify({
     Title = "Fract Hub",
-    Content = "The Hub-Test sample has been loaded.",
+    Content = DashboardManager
+        and "The Hub-Test sample has been loaded."
+        or "The sample loaded without DashboardManager. Check the console warning for details.",
     Duration = 6
 })
