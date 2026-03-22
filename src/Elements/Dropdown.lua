@@ -16,6 +16,42 @@ Element.__type = "Dropdown"
 
 local CLICK_DRAG_THRESHOLD = 6
 
+local function normalizeMultiValue(values, selectedValues)
+	local normalized = {}
+
+	if type(selectedValues) ~= "table" then
+		return normalized
+	end
+
+	for value in next, selectedValues do
+		if table.find(values, value) then
+			normalized[value] = true
+		end
+	end
+
+	return normalized
+end
+
+local function isSameSelection(currentValue, nextValue, isMulti)
+	if isMulti then
+		for value in next, currentValue do
+			if not nextValue[value] then
+				return false
+			end
+		end
+
+		for value in next, nextValue do
+			if not currentValue[value] then
+				return false
+			end
+		end
+
+		return true
+	end
+
+	return currentValue == nextValue
+end
+
 function Element:New(Idx, Config)
 	local Library = self.Library
 
@@ -345,6 +381,12 @@ function Element:New(Idx, Config)
 		DropdownDisplay.Text = (Str == "" and "--" or Str)
 	end
 
+	function Dropdown:RefreshButtons()
+		for _, ButtonData in next, Dropdown.Buttons do
+			ButtonData:UpdateButton()
+		end
+	end
+
 	function Dropdown:GetActiveValues()
 		if Config.Multi then
 			local T = {}
@@ -560,9 +602,6 @@ function Element:New(Idx, Config)
 				end
 			end)
 
-			Table:UpdateButton()
-			Dropdown:Display()
-
 			Buttons[Button] = Table
 		end
 
@@ -577,6 +616,8 @@ function Element:New(Idx, Config)
 		ListSizeX = ListSizeX + 30
 
 		Dropdown.Buttons = Buttons
+		Dropdown:RefreshButtons()
+		Dropdown:Display()
 		RecalculateCanvasSize()
 		RecalculateListSize()
 	end
@@ -595,25 +636,27 @@ function Element:New(Idx, Config)
 	end
 
 	function Dropdown:SetValue(Val)
+		local nextValue
+
 		if Dropdown.Multi then
-			local nTable = {}
-
-			for Value, Bool in next, Val do
-				if table.find(Dropdown.Values, Value) then
-					nTable[Value] = true
-				end
-			end
-
-			Dropdown.Value = nTable
+			nextValue = normalizeMultiValue(Dropdown.Values, Val)
 		else
 			if not Val then
-				Dropdown.Value = nil
+				nextValue = nil
 			elseif table.find(Dropdown.Values, Val) then
-				Dropdown.Value = Val
+				nextValue = Val
+			else
+				nextValue = Dropdown.Value
 			end
 		end
 
-		Dropdown:BuildDropdownList()
+		if isSameSelection(Dropdown.Value, nextValue, Dropdown.Multi) then
+			return
+		end
+
+		Dropdown.Value = nextValue
+		Dropdown:RefreshButtons()
+		Dropdown:Display()
 
 		Library:SafeCallback(Dropdown.Callback, Dropdown.Value)
 		Library:SafeCallback(Dropdown.Changed, Dropdown.Value)
