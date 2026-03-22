@@ -1,14 +1,17 @@
-﻿local ReplicatedStorage = game:GetService("ReplicatedStorage")
+if getgenv().Script_Maid then
+    pcall(function()
+        getgenv().Script_Maid:Destroy()
+    end)
+end
 
-local Fluent = require(ReplicatedStorage:WaitForChild("Fluent"))
-local Addons = ReplicatedStorage:WaitForChild("FluentAddons")
-local SaveManager = require(Addons:WaitForChild("SaveManager"))
-local InterfaceManager = require(Addons:WaitForChild("InterfaceManager"))
-local DashboardManager = require(Addons:WaitForChild("DashboardManager"))
+local Fluent = loadstring(game:HttpGet("https://raw.githubusercontent.com/xFract/Hub-Test/main/dist/main.lua"))()
+local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/xFract/Hub-Test/main/Addons/SaveManager.lua"))()
+local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/xFract/Hub-Test/main/Addons/InterfaceManager.lua"))()
+local DashboardManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/xFract/Hub-Test/main/Addons/DashboardManager.lua"))()
 
 local Window = Fluent:CreateWindow({
     Title = "Fract Hub",
-    SubTitle = "Local Sample",
+    SubTitle = "Hub-Test Sample",
     TabWidth = 160,
     Size = UDim2.fromOffset(560, 420),
     Acrylic = true,
@@ -27,17 +30,15 @@ Tabs.Config = Window:AddTab({ Title = "Config", Icon = "save" })
 
 DashboardManager:SetLibrary(Fluent)
 DashboardManager:BuildDashboardTab(Tabs.Dashboard, {
-    GameName = "Local Sample",
+    GameName = "Hub-Test Sample",
     Developer = "xFract",
     Discord = "https://discord.gg/c3qbzApe"
 })
 
-local Options = Fluent.Options
-
 local MainSection = Tabs.Main:AddSection("Main Controls")
 MainSection:AddParagraph({
     Title = "Overview",
-    Content = "This sample runs entirely from local Rojo modules, including SaveManager, InterfaceManager, and DashboardManager."
+    Content = "This sample loads Fluent and the addons directly from the Hub-Test GitHub repository."
 })
 
 local AutoFarmToggle = MainSection:AddToggle("AutoFarm", {
@@ -73,15 +74,15 @@ MainSection:AddButton({
     Description = "Exercises dialog and notification paths.",
     Callback = function()
         Window:Dialog({
-            Title = "Local Sample",
-            Content = "This dialog confirms the local sample is wired correctly.",
+            Title = "Hub-Test Sample",
+            Content = "This dialog confirms the remote loadstring sample is wired correctly.",
             Buttons = {
                 {
                     Title = "Notify",
                     Callback = function()
                         Fluent:Notify({
                             Title = "Fract Hub",
-                            Content = "Local sample is working.",
+                            Content = "Remote sample is working.",
                             Duration = 5
                         })
                     end
@@ -117,7 +118,7 @@ end)
 SaveManager:SetLibrary(Fluent)
 InterfaceManager:SetLibrary(Fluent)
 SaveManager:IgnoreThemeSettings()
-SaveManager:SetFolder("FractHub/LocalSample")
+SaveManager:SetFolder("FractHub/HubTestSample")
 InterfaceManager:SetFolder("FractHub")
 
 InterfaceManager:BuildInterfaceSection(Tabs.Settings)
@@ -132,6 +133,6 @@ end)
 
 Fluent:Notify({
     Title = "Fract Hub",
-    Content = "The local sample has been loaded.",
+    Content = "The Hub-Test sample has been loaded.",
     Duration = 6
 })
